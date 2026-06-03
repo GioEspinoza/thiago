@@ -70,3 +70,4 @@ while True:
         break
 cap.release() # Release the camera
 cv2.destroyAllWindows() # Close all OpenCV windows
+#
