@@ -49,7 +49,7 @@ def find_tallest_person(people):
 
     return max(people, key=lambda p: p["height"])
 
-model = YOLO('yolov8n.pt')  # Load the YOLOv8n model
+model = YOLO('yolov8n.pt')  
 cap = cv2.VideoCapture(0) # Open the camera (use 0 for default camera, change if you have multiple cameras)
 extractor = FeatureExtractor(
     model_name='osnet_x1_0',
@@ -57,45 +57,45 @@ extractor = FeatureExtractor(
     device='cuda' if torch.cuda.is_available() else 'cpu'
 ) # Initialize the feature extractor for person re-identification using the OSNet model
 
-if not cap.isOpened(): # Check if the camera opened successfully
+if not cap.isOpened(): 
     print("Error: Could not open camera.")
     exit()
 
 while True:
-    ret, frame = cap.read() # Read a frame from the camera
-    if not ret: # Check if the frame was read successfully
+    ret, frame = cap.read()
+    if not ret: 
         print("Error: Could not read frame.") 
         break
 
     results = model.track(frame, stream=True, classes=[0], persist=True, tracker='botsort.yaml') # Run object detection and tracking on the frame, filtering for class ID 0 (person)
     #BoTSort is a tracking algorithm that can be used with YOLO models to track detected objects across frames. The 'botsort.yaml' file contains the configuration for the BoTSort tracker.
 
-    for result in results: # Iterate through the results
-        boxes = result.boxes # Get bounding boxes from the result
+    for result in results: 
+        boxes = result.boxes 
 
-        if boxes is None: # If no boxes are detected, skip to the next frame
+        if boxes is None:
             continue
         
-        people = get_people_from_boxes(boxes) # Get the list of detected people from the bounding boxes
-        tallest = find_tallest_person(people) # Find the tallest person from the list of detected people
+        people = get_people_from_boxes(boxes) 
+        tallest = find_tallest_person(people) 
 
         if tallest is None:
             continue
 
-        target_id = tallest['track_id'] # Get the tracking ID of the tallest person
+        target_id = tallest['track_id']
 
-        for person in people: # Iterate through the detected people
+        for person in people: 
            
-            person_crop = frame[person['box'][1]:person['box'][3], person['box'][0]:person['box'][2]] # Crop the person's bounding box from the frame
+            person_crop = frame[person['box'][1]:person['box'][3], person['box'][0]:person['box'][2]] 
            
-            features = extractor(person_crop) # Extract features from the cropped person image using the feature extractor
+            features = extractor(person_crop) #extract features for future reference
                 
-            draw_person(frame, person, target_id) # Draw the bounding box and label for the person on the frame
+            draw_person(frame, person, target_id) 
            
     cv2.imshow('Camera', frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'): # Exit the loop if 'q' is pressed
         break
-cap.release() # Release the camera
-cv2.destroyAllWindows() # Close all OpenCV windows
+cap.release() 
+cv2.destroyAllWindows() 
 
