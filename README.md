@@ -1,176 +1,130 @@
-# Thiago: Intelligent Child Tracking and Assistance System
+# Thiago
 
-## Overview
+[![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![OpenCV](https://img.shields.io/badge/Vision-OpenCV-5C3EE8?logo=opencv&logoColor=white)](https://opencv.org/)
+[![YOLOv8](https://img.shields.io/badge/Detection-YOLOv8-111F68)](https://docs.ultralytics.com/models/yolov8/)
+[![Repository checks](https://github.com/GioEspinoza/thiago/actions/workflows/ci.yml/badge.svg)](https://github.com/GioEspinoza/thiago/actions/workflows/ci.yml)
 
-Thiago is an AI-powered child monitoring and assistance system designed to identify, track, and monitor a specific child in real time using computer vision and machine learning.
+Thiago is an early-stage computer-vision perception system for a planned
+assistive mobile robot. The current prototype detects and tracks people from a
+live camera, selects the tallest visible tracked person, and extracts OSNet
+appearance features for future person re-identification work.
 
-The project's long-term goal is to create a mobile robotic platform capable of following a designated child, analyzing behavior, providing interaction, and notifying caregivers when necessary.
+The long-term goal is a robotic platform that can follow a designated child and
+support caregiver-facing monitoring. This repository currently covers only the
+software perception prototype—not autonomous robotics, identity recognition,
+behavioral analysis, or caregiver notifications.
 
-This repository currently contains the software perception pipeline responsible for human detection, tracking, and identity recognition.
+## Current capabilities
 
----
+- Capture a live webcam feed with OpenCV
+- Detect people using YOLOv8
+- Track multiple people across frames with BoT-SORT
+- Filter low-confidence or untracked detections
+- Select the tallest visible tracked person as the temporary target
+- Crop each detected person and extract OSNet appearance features
+- Visualize target and non-target detections in real time
 
-## Features
-
-### Human Detection
-
-Uses YOLOv8 to perform real-time human detection from a live camera feed.
-
-* Detects people in each frame
-* Filters detections to the "person" class
-* Draws bounding boxes around detected individuals
-
-### Multi-Object Tracking
-
-Uses BoTSORT to maintain tracking IDs across video frames.
-
-* Assigns temporary IDs to detected individuals
-* Maintains identity consistency between frames
-* Supports tracking multiple people simultaneously
-
-### Target Selection
-
-Implements custom target selection logic.
-
-Current implementation:
-
-* Detect all people in frame
-* Determine the tallest detected individual
-* Designate selected individual as the target
-
-Future versions will support manual and automatic target acquisition.
-
-### Person Re-Identification (ReID)
-
-Uses TorchReID with OSNet to generate appearance embeddings for detected individuals.
-
-* Extracts a 512-dimensional feature vector for each detected person
-* Creates appearance-based identity representations
-* Enables identity matching across tracking failures
-
-### Identity Recognition
-
-Planned implementation:
-
-* Generate reference embeddings from known images
-* Store identity embeddings locally
-* Compare live embeddings against known identities
-* Identify and track specific individuals
-
-Example:
+## Pipeline
 
 ```text
-Detected Person
-        ↓
-Generate Embedding
-        ↓
-Compare Against Stored Identity Embeddings
-        ↓
-Match Found?
-        ↓
-YES → Identify as Target Child
-NO  → Unknown Individual
+Camera frame
+    ↓
+YOLOv8 person detection
+    ↓
+BoT-SORT track IDs
+    ↓
+Bounding-box filtering and person crops
+    ↓
+Tallest-person target selection
+    ↓
+OSNet feature extraction
+    ↓
+Annotated live preview
 ```
 
----
+The extracted OSNet features are not yet stored or compared. Persistent
+identity matching remains roadmap work.
 
-## Software Architecture
+## Local setup
+
+### Requirements
+
+- Python 3.12
+- A working webcam
+- CPU execution or a CUDA-capable environment supported by PyTorch
+- YOLOv8 Nano weights
+- An OSNet x1.0 ImageNet checkpoint
+
+### Installation
+
+```bash
+git clone https://github.com/GioEspinoza/thiago.git
+cd thiago
+python -m venv venv
+source venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+On Windows:
+
+```powershell
+venv\Scripts\activate
+```
+
+Place the model files at the repository root using the names expected by the
+prototype:
 
 ```text
-Camera Feed (OpenCV)
-          ↓
-YOLOv8 Human Detection
-          ↓
-BoTSORT Tracking
-          ↓
-Person Cropping
-          ↓
-OSNet Feature Extraction
-          ↓
-Identity Comparison
-          ↓
-Target Selection
-          ↓
-Visualization & Tracking Output
+yolov8n.pt
+osnet_x1_0_imagenet.pth
 ```
 
----
+Model weights are intentionally excluded from Git because they are large
+third-party artifacts. Ultralytics may download YOLO weights automatically;
+the OSNet checkpoint must be available at the configured local path.
 
-## Current Technology Stack
+### Run
 
-### Computer Vision
+```bash
+python testcam.py
+```
 
-* OpenCV
-* YOLOv8
-* BoTSORT
+Press `q` in the camera window to exit.
 
-### Machine Learning
+## Technology
 
-* PyTorch
-* TorchReID
-* OSNet
+- Python
+- OpenCV
+- Ultralytics YOLOv8
+- BoT-SORT
+- PyTorch
+- Torchreid
+- OSNet
 
-### Development
+## Project status
 
-* Python
-* Git
-* GitHub
-* Linux
+| Phase | Status |
+|---|---|
+| Webcam capture and person detection | Implemented |
+| Multi-object tracking | Implemented |
+| Temporary tallest-person selection | Implemented |
+| OSNet feature extraction | Implemented |
+| Reference identity enrollment | Planned |
+| Persistent identity matching | Planned |
+| Behavioral event detection | Planned |
+| Caregiver notifications | Planned |
+| Motor and sensor integration | Planned |
 
----
+## Privacy and safety
 
-## Project Roadmap
-
-### Phase 1: Human Detection
-
-* [x] Camera integration
-* [x] YOLOv8 detection
-* [x] Bounding box visualization
-
-### Phase 2: Human Tracking
-
-* [x] BoTSORT integration
-* [x] Tracking IDs
-* [x] Target selection logic
-
-### Phase 3: Identity Recognition
-
-* [ ] Reference image dataset
-* [ ] Identity embedding generation
-* [ ] Embedding storage
-* [ ] Similarity matching
-* [ ] Persistent identity recognition
-
-### Phase 4: Behavioral Analysis
-
-* [ ] Activity monitoring
-* [ ] Behavioral event detection
-* [ ] Caregiver notifications
-
-### Phase 5: Robotic Integration
-
-* [ ] Arduino integration
-* [ ] Motor control
-* [ ] Autonomous following
-* [ ] Speaker system
-* [ ] Sensor integration
-
----
-
-## Motivation
-
-Thiago was created to explore how modern computer vision, machine learning, and robotics can be combined to build intelligent systems capable of assisting children with special needs.
-
-The project serves as both a learning platform and a foundation for future assistive technologies.
-
----
+This prototype processes live camera frames and is not production-ready.
+Obtain consent before recording or monitoring anyone, especially children.
+Do not use the current tallest-person heuristic as an identity or safety
+decision system.
 
 ## Authors
 
-### Software Development
-
-Giovanni Espinoza
-
-### Hardware Development
-
-Giselle Espinoza
+- Software: [Giovanni Espinoza](https://github.com/GioEspinoza)
+- Hardware collaboration: Giselle Espinoza

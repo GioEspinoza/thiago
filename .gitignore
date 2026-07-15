@@ -1,2 +1,24 @@
-venv
-yolov8n.pt
+# Virtual environments and Python artifacts
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Model weights and generated ML artifacts
+*.pt
+*.pth
+*.onnx
+runs/
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Local secrets
+.env
+.env.*
+!.env.example
